@@ -14,7 +14,8 @@
             [metabase.driver.generic-sql.query-processor :as sqlqp]
             [metabase.util
              [date :as du]
-             [honeysql-extensions :as hx]])
+             [honeysql-extensions :as hx]]
+            [schema.core :as s])
   (:import [java.sql Time Timestamp]))
 
 (defrecord SQLiteDriver []
@@ -152,6 +153,10 @@
     (du/format-date "yyyy-MM-dd" obj)
     ;; every other prepared statement arg can be returned as-is
     obj))
+
+(s/defmethod sql/->prepared-substitution [SQLiteDriver java.util.Date] :- sql/PreparedStatementSubstitution
+  [_ date]
+  (sql/make-stmt-subs "?" [(du/format-date "yyyy-MM-dd" date)]))
 
 ;; SQLite doesn't support `TRUE`/`FALSE`; it uses `1`/`0`, respectively; convert these booleans to numbers.
 (defmethod sqlqp/->honeysql [SQLiteDriver Boolean]

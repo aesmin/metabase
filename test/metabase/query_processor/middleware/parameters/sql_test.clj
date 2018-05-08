@@ -598,7 +598,9 @@
   (tu/with-temporary-setting-values [report-timezone "America/Los_Angeles"]
     (first-row
       (process-native
-        :native     {:query         "SELECT cast({{date}} as date)"
+        :native     {:query         (if (= :bigquery datasets/*engine*)
+                                      "SELECT {{date}} as date"
+                                      "SELECT cast({{date}} as date)")
                      :template_tags {:date {:name "date" :display_name "Date" :type "date" }}}
         :parameters [{:type "date/single" :target ["variable" ["template-tag" "date"]] :value "2018-04-18"}]))))
 
